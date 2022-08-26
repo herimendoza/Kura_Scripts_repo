@@ -1,0 +1,28 @@
+#!/bin/bash
+
+# ++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+# Title: Spellchecker script
+# Author: Heriberto Mendoza
+
+# Description: This spellchecker script will ask the user for a file name. The script will look for
+# the file and once the file is found, the script will run a spellchecker command.
+#
+# Notes: 
+# 1- Since script searches by name and does not specify a file format, any files with the same name
+# but different extension will show up. e.g file1.txt and file1.csv
+# 2- files titled the same but in different directories will show up.
+# ++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+
+#display prompt
+echo "What file would you like to spell check? Enter name of the file, no extension necessary:"
+
+read file;
+
+#find file
+filepath=$(find /home/herimendoza -name $file*);
+
+#spellchecker
+aspell check $filepath;
+
+exit 0;
+

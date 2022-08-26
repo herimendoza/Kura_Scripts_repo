@@ -1,0 +1,66 @@
+#!/bin/bash
+
+# +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+# BUILD SCRIPT 1
+#
+# AUTHOR: Heriberto Mendoza
+#
+# DATE: 5 August 2022
+#
+# DESCRIPTION: SOFTWARE MANAGEMENT SCRIPT - This script will automatically
+# update the server depending on the crontab job. Once the server has been
+# updated, a file detailing the updated packages (if any) will be generated;
+# file will be date-stamped. Script will run automatically without user
+# interaction.
+#
+# Instructions: place this file in your ~/bin folder. Edit the /etc/crontab
+# file with the crontab job specified below. Must run nano command as sudo.
+
+# crontab: 0 23 * * 5 --> will run every Friday at 11pm
+
+# add this to the crontab file:
+# replace "yourusername" and "yourpassword" with your username and password
+# 0 23 * * 5 "yourusername" ~/bin/buildscript1_final "yourpassword"
+
+# +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+
+
+# take in password as an argument
+# for use in sudo commands later
+u_passwd=$1;
+
+
+# create a variable to hold the home directory of the user
+home_dir=$HOME;
+
+# check if a sys_update_logs folder exits
+# if not, create one
+if [[ ! -d "$home_dir/Desktop/sys_update_logs" ]];
+	then
+	echo "There is no sys_update_logs directory. Making one now.";
+	mkdir $home_dir/Desktop/sys_update_logs;
+else
+	echo "sys_update_logs directory already exists!";
+fi
+
+# variable that stores current date
+now_date=$(date +"%d_%m_%Y_%T");
+
+# variable that stores absolute filepath of update log
+# filepath has appended current date
+new_log="$home_dir/Desktop/sys_update_logs/update_$now_date.txt";
+
+# updates list of packages
+# passes password into the sudo command
+echo $u_passwd | sudo -S apt update;
+
+# upgrade the packages
+# store output of packages updated into txt file
+# filepath specified above in $new_log
+echo $u_passwd | sudo -S apt upgrade > $new_log;
+
+# change permissions of file to read only
+chmod 444 $new_log;
+
+exit 0;
+

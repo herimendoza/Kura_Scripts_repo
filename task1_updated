@@ -1,0 +1,48 @@
+#!/bin/bash
+
+# ++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+# Title: IP server connection script
+# Author: Heriberto Mendoza
+#
+# Description: This script will take in a file database of IPV4s.
+# The available IPv4s will be displayed and the user will be asked
+# if they would like to log on to any of them. Once an IPv4 is selected
+# the script will attempt to log onto the server. 
+#
+# ++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+#task1 script: ipv4 exercise.
+
+#display all ipv4s for user from file
+echo "IPv4s available:";
+
+#find ipv4 file from anywhere in system and display
+ipv4_database=$(find ~/ -name sample_ipv4s.txt);
+cat $ipv4_database;
+
+echo "---------------------------------------------------------";
+
+#use inputs ipv4
+read -p "What IPv4 would you like to connect to? " ipv4;
+
+#error case - if empty
+if [[ -z $ipv4 ]];
+	then
+	echo "Enter an IPv4 listed above";
+	exit 1;
+fi;
+
+# Error case: if $ipv4 is not found in list
+# search txt file for input
+# use grep with !=
+if [[ "$ipv4" != $(grep -w "$ipv4" $ipv4_database) ]];
+	then
+	echo "Invalid IPv4 entered";
+	exit 1
+fi
+
+#if correct IPv4 is listed above:
+$(ssh -i private.pem ubuntu@$ipv4);
+echo "-------------------------------------------------------"
+echo "You have logged into to ubuntu@$ipv4"
+
+exit 0;

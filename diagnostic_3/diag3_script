@@ -1,0 +1,33 @@
+#!/bin/bash
+
+# ++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+# Diagnostic 3 script: Package checker
+# Author: Heriberto Mendoza
+# Description: This dynamic script will ask the user for a package name. The script will 
+# proceed and check to see if said package is installed in the server, and will notify
+# the user accordingly. If the package is found, the script will display all relevant
+# packages.
+# Notes:
+# When prompted for a package name, misspellings will not register. As this is a grep
+# search, any packages with the keyword will be shown.
+# ++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+
+# This script will check if a package named by the user is installed or not
+
+# prompt: what package are you looking for?
+read -p "What package are you looking for? " var_pkg;
+
+# check if package is installed
+# apt list --installed | grep $var_pkg;
+
+if [[ -z $(apt list --installed | grep $var_pkg) ]];
+	then
+	echo "No package found";
+else
+	echo "Package found!";
+	apt list --installed | grep $var_pkg;
+
+fi
+
+exit 0;
+

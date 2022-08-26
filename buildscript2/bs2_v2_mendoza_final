@@ -1,0 +1,115 @@
+#!/bin/bash
+
+# +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+# BUILD SCRIPT 2
+#
+# AUTHOR: Heriberto Mendoza
+#
+# DATE: 11 August 2022
+#
+# DESCRIPTION: RESOURCE MANAGEMENT SCRIPT - This is a dynamic script that
+# automatically checks a server's processes and system perfomance. Once
+# initiated, it will check all processes and if a process is found to have
+# exceeded the %RAM threshold specified by the user, it will prompt the user
+# and give them the option to terminated the process in question.
+#
+# Instructions: Run the script.
+#
+# NOTE: SCRIPT WILL BREAK IF:
+# 1- Not fully tested, but there may be an issue in this script with the
+# comparison of floats and using the >,<,= operators. Threshold and pmem
+# are floats; and there might be an issue with >,<,= : symbols might compare
+# values by place and not sequentially.
+# 2- Script will ask you to delete gnome-shell -- This is the GUI of
+# Linux VM and probaly should not be terminated? User should be careful.
+# +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+
+# Title
+echo "++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++";
+echo "System Resource Management Script";
+echo "++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++";
+
+
+# Initialization prompt
+read -p "This script will analyze your system processes and recommend termination of resource intensive ones. Do you wish to proceed? [y/n] " ans;
+#lowercase
+ans=$(echo $ans | tr 'A-Z' 'a-z');
+
+# error checks for empty, or wrong input -- while loop
+while [[ -z $ans ]] || [[ $ans != "n" ]] && [[ $ans != "y" ]];
+do
+echo "Error. Invalid input entered.";
+read -p "This script will analyze your system processes and recommend termination of resource intensive ones. Do you wish to proceed? [y/n] " ans;
+ans=$(echo $ans | tr 'A-Z' 'a-z');
+done
+
+# if user input equals y or n
+if [[ $ans == "y" ]];
+    then
+    echo "Proceeding with analysis...";
+elif [[ $ans == "n" ]];
+    then
+    echo "Terminating script. Goodbye.";
+    exit 0;
+fi
+
+# input a user variable
+read -p "Set a memory threshold (%memory). Enter a value between 0-100. " var_thresh;
+
+# take a snapshot of system processes and redirect into to new file
+ps -e -o pid,uname,pmem,comm --sort pmem --no-headers > ~/Desktop/process.txt
+
+
+# go through 3rd field of each line
+# if 3rd field val exceeds threshold, redirect entire line to another file
+cat ~/Desktop/process.txt | awk '{if ($3 >= '$var_thresh') print $0}' > ~/Desktop/term_process.txt;
+
+echo "++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++";
+echo "STARTING TERMINATION PROCESS";
+echo "++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++";
+
+echo "Processes using at least $var_thresh% of memory will be earmarked for termination.";
+
+# file variable
+file=~/Desktop/term_process.txt;
+
+# Process termination loop
+# read from file descriptor 3 -- differentiate from read file and read user input
+# allows for read command inside read while loop
+while read -r -u 3 var_pid var_uname var_pmem var_comm;
+    do
+    #termination prompt
+    echo "The process $var_comm is using $var_pmem% of system memory, meeting the threshold of $var_thresh%. Recommend termination of process.";
+    read -p "Do you wish to terminate $var_comm? [y/n] " term_ans;
+    term_ans=$(echo $term_ans | tr 'A-Z' 'a-z');
+    #error cases -- while loop
+    while [[ -z $term_ans ]] || [[ $term_ans != "n" ]] && [[ $term_ans != "y" ]];
+    do
+    read -p "Error: Enter a valid input. Do you wish to terminate $var_comm? [y/n] " term_ans;
+    term_ans=$(echo $term_ans | tr 'A-Z' 'a-z');
+    done
+    # termination
+    if [[ $term_ans == "n" ]];
+        then
+        echo "$var_comm will not be terminated";
+    elif [[ $term_ans == "y" ]];
+        then
+        echo "Terminating $var_comm...";
+        sudo kill -9 $var_pid;
+        echo "Process terminated.";
+    fi
+    echo "------------------------------------------------------------------";
+done 3< $file;
+
+# process complete message
+echo "++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++"
+echo "TERMINATION PROCESS COMPLETED";
+echo "++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++"
+
+# delete text files
+rm $file;
+rm ~/Desktop/process.txt;
+
+echo "System analysis completed. Goodbye";
+
+exit 0;

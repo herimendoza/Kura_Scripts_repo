@@ -1,0 +1,33 @@
+#!/bin/bash
+
+# +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+# Diagnostic 4: Send File Script
+# Author: Heriberto Mendoza
+# Description: This dynamic script will prompt the user for a hostname, IP, private key, and
+# a file name. Once the relevant information has been provided, the script will
+# exectue the command to send the file and then check if the file has been successfully
+# copied to the server.
+# Notes:
+# The scp command (send to server) does not currently work. Figuring out proper syntax.
+# +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+#this script will send a file to a server specified and let the user know it exists
+
+#Ask for hostname
+read -p "What is the hostname? " var_hostname;
+
+#ask for IP
+read -p "What is the IP? " var_ip;
+
+#ask for location of private key
+read -p "Where is the private key? input filepath: " var_pem;
+
+#ask for location of file
+read -p "What file do you want to send? input filepath " var_file;
+
+#send file
+scp $var_file $var_hostname@$var_ip:/home/ubuntu -i ~/Desktop/Cali1.pem;
+
+#check if file exists
+ssh -t $var_hostname@$var_ip -i $var_pem ls;
+
+exit 0;

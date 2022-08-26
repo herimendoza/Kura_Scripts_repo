@@ -1,0 +1,38 @@
+#!/bin/bash
+
+# ++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+# Diagnostic 4: Server check script
+# Author: Heriberto Mendoza
+# Description: When given a hostname, an IP address, and a .pem file (private key),
+# the script will attempt to ping the server to check if it is online. If the ping was
+# verified, then the script will attempt to connect.
+# ++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+
+#Ask for hostname
+read -p "What is the hostname? " var_hostname;
+
+#ask for IP
+read -p "What is the IP?" var_ip;
+
+#ask for location of private key
+read -p "Where is the private key? input filepath: " var_pem;
+
+#ping server
+#search output for received confirmation;
+ping -c1 -W1 $var_ip > ~/Desktop/pingcheck.txt;
+cat ~/Desktop/pingcheck.txt | grep "1 received" > ~/Desktop/ping_rcv.txt;
+
+#if file is not empty (received confirmation was found), connect
+if [[ -s ~/Desktop/ping_rcv.txt ]];
+then
+echo "Server is online. Connecting now...";
+ssh -i $var_pem $var_hostname@$var_ip;
+else
+echo "Server is not online.";
+fi
+
+#delete files created
+rm ~/Desktop/pingcheck.txt;
+rm ~/Desktop/ping_rcv.txt
+
+exit 0;
