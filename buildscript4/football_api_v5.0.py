@@ -15,6 +15,8 @@
 # script to perform the conversion
 # 2-Although the csv file will be printed sorted by league positon at the end, 
 # the generated csv file mayb be out of order (acccording to league position).
+# 3-This Script requires a rapidapi-key to work.
+#
 #
 #######################################################################################
 
